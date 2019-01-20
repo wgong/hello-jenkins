@@ -1,11 +1,11 @@
 pipeline {
-    agent { docker { image 'maven:3.3.3' } }
+    agent { docker { image 'golang' } }
     stages {
         stage('build') {
             steps {
-                sh 'mvn --version'
+                echo 'build golang'
+                sh 'go version'
             }
         }
     }
 }
-

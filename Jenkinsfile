@@ -1,19 +1,9 @@
 pipeline {
-    agent any
+    agent { docker { image 'python:3.6.3' } }
     stages {
-        stage('Build') {
+        stage('build') {
             steps {
-                sh 'echo "Hello Jenkins"'
-                sh '''
-                    echo "Multiline shell steps"
-                    whoami
-                    hostname
-                    pwd
-                    ifconfig
-                    uname -a
-                    ls -lah
-                    which python3
-                '''
+                sh 'python --version'
             }
         }
     }

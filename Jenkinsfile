@@ -3,11 +3,7 @@ pipeline {
     stages {
         stage('Test') {
             steps {
-                sh '''
-                   pwd
-                   ls
-                   rm readme.md
-                '''
+                sh 'echo "OK now!"; exit 0'
             }
         }
     }

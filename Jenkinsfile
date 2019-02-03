@@ -1,35 +1,41 @@
 pipeline {
-    environment {
-      /*
-       * Uses a Jenkins credential called "FOOCredentials" and creates environment variables:
-       * "$FOO" will contain string "USR:PSW"
-       * "$FOO_USR" will contain string for Username
-       * "$FOO_PSW" will contain string for Password
-       */
-      FOO = credentials("jenkins_admin_user1")
+  /*
+   * The environment section is used for setting environment variables and will allow for
+   * expanding variable and other methods to set those values as long as the return type is a String.
+   * String escaping in Groovy can affect the behavior here. Please refer here for detailed explainations
+   * http://docs.groovy-lang.org/latest/html/documentation/#all-strings
+   * The 'readMavenPom()' method is provided by the Pipeline Utility Steps plugin
+   */
+  environment {
+    FOO = "BAR"
+    BUILD_NUM_ENV = currentBuild.getNumber()
+    ANOTHER_ENV = "${currentBuild.getNumber()}"
+    INHERITED_ENV = "\${BUILD_NUM_ENV} is inherited"
+    ACME_FUNC = readMavenPom().getArtifactId()
+  }
+
+  agent any
+
+  stages {
+    stage("Environment") {
+      steps {
+        sh 'echo "FOO is $FOO"'
+        // returns 'FOO is BAR'
+
+        sh 'echo "BUILD_NUM_ENV is $BUILD_NUM_ENV"'
+        // returns 'BUILD_NUM_ENV is 4' depending on the build number
+
+        sh 'echo "ANOTHER_ENV is $ANOTHER_ENV"'
+        // returns 'ANOTHER_ENV is 4' like the previous depending on the build number
+
+        sh 'echo "INHERITED_ENV is $INHERITED_ENV"'
+        // returns 'INHERITED_ENV is ${BUILD_NUM_ENV} is inherited'
+        // The \ escapes the $ so the variable is not expanded but becomes a literal
+
+        sh 'echo "ACME_FUNC is $ACME_FUNC"'
+        // returns 'ACME_FUNC is spring-petclinic' or the name of the artifact in the pom.xml
+      }
     }
-
-    agent any
-
-    stages {
-        stage("foo") {
-            steps {
-                // all credential values are available for use but will be masked in console log
-                sh 'echo "FOO is $FOO"'
-                sh 'echo "FOO_USR is $FOO_USR"'
-                sh 'echo "FOO_PSW is $FOO_PSW"'
-
-                //Write to file
-                sh 'pwd'
-                dir("combined") {
-                    sh 'echo $FOO > foo.txt'
-                }
-                sh 'echo $FOO_PSW > foo_psw.txt'
-                sh 'echo $FOO_USR > foo_usr.txt'
-                archive "**/*.txt"
-
-            }
-        }
-    }
+  }
 }
 
